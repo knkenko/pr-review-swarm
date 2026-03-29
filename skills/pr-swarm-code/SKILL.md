@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-code
-description: "Expert code reviewer for project guidelines, style, best practices, and bug detection with confidence scoring"
+description: "Expert code reviewer for project guidelines, style, best practices, and bug detection with confidence scoring. Use this for any PR review where you want a general quality check — catches bugs, convention violations, and quality issues across all languages."
 user-invocable: true
 ---
 
@@ -72,6 +72,13 @@ For each high-confidence issue, provide:
 Group issues by severity, Critical first.
 
 If no high-confidence issues exist, confirm the code meets standards with a brief summary of what was checked and why it passes.
+
+**Example finding:**
+- **Severity**: Critical (92) — **Confidence**: 92
+- **Location**: `src/utils/cache.ts:31`
+- **Description**: `setTimeout` callback captures `this` via arrow function, but the class instance may be garbage collected before the timer fires. The callback will operate on stale state or throw.
+- **Rule**: Resource cleanup — timers must be cleared in cleanup/dispose
+- **Recommendation**: Store the timer ID and clear it in the class destructor or cleanup method.
 
 ## Principles
 

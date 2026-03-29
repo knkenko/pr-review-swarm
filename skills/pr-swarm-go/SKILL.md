@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-go
-description: "Review Go PR diffs for error handling gaps, goroutine leaks, channel misuse, and non-idiomatic patterns"
+description: "Review Go PR diffs for error handling gaps, goroutine leaks, channel misuse, and non-idiomatic patterns. Use whenever a PR changes .go files — catches unchecked errors, goroutine leaks, context misuse, and defer pitfalls."
 user-invocable: true
 ---
 
@@ -98,3 +98,6 @@ Review only changed lines and their immediate context in the PR diff. Do not fla
 - Go is opinionated. Align findings with official Go style (Effective Go, Go Code Review Comments, Go Proverbs).
 - Be specific. Every finding must explain the concrete consequence (panic, leak, race, etc.).
 - You analyze and report only. You do not modify code.
+
+**Example finding:**
+- `internal/worker/pool.go:67` — `go handleJob(job)` launches a goroutine with no cancellation path. If the parent context is cancelled, these goroutines keep running and hold connections. Pass `ctx` and check `ctx.Done()` in the handler, or use a `WaitGroup` to track completion.

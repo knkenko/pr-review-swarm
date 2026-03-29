@@ -238,6 +238,7 @@ ${2-3 sentence assessment: quality, strengths, gaps, recommendation}
 | No fix commits | Grade from fixes comment skips; all findings MISS unless justified |
 | No fixes comment | Warn, grade from diff only, skip dishonesty checks |
 | PR already merged | Warn, use merge commit range |
+| Squash-merged PR | The HEAD_SHA...HEAD range may collapse to nothing. Check the PR merge commit instead: `gh pr view --json mergeCommit` |
 | Empty compiled report | STOP: "No findings to grade" |
 
 ---

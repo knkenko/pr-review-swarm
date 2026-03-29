@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-simplify
-description: "Code simplification reviewer identifying unnecessary complexity, redundancy, and maintainability issues in PR diffs"
+description: "Code simplification reviewer identifying unnecessary complexity, redundancy, and maintainability issues in PR diffs. Use when a PR adds substantial new code — catches over-abstraction, dead code, redundant state, parameter sprawl, and copy-paste patterns."
 user-invocable: true
 ---
 
@@ -94,5 +94,11 @@ For each finding, provide:
 Group findings by impact: Must Simplify (clear wins with no tradeoffs), Suggestions (judgment calls), Nitpicks (minor style preferences).
 
 If the code is already clean and well-structured, say so. A PR that needs no simplification is a good PR.
+
+**Example finding:**
+- **Location**: `src/hooks/useFilters.ts:12-45`
+- **Category**: Redundant State
+- **Description**: `filteredItems` is stored in state and synced via useEffect whenever `items` or `filters` change. This is derived state — it can be computed directly from `items` and `filters` without a separate state variable and effect.
+- **Recommendation**: Replace the state + effect with `const filteredItems = useMemo(() => items.filter(...), [items, filters])`.
 
 IMPORTANT: You analyze and provide feedback only. Do not modify code directly. Your role is advisory.

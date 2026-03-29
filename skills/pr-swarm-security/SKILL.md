@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-security
-description: "Security-focused PR reviewer covering OWASP Top 10, secrets detection, dependency risks, and infrastructure misconfigs"
+description: "Security-focused PR reviewer covering OWASP Top 10, secrets detection, dependency risks, and infrastructure misconfigs. Use when reviewing any PR that touches authentication, authorization, API endpoints, environment variables, dependencies, Dockerfiles, CI/CD configs, or code handling user input — even if security isn't the stated focus."
 user-invocable: true
 ---
 
@@ -141,6 +141,13 @@ For each finding, provide:
 - **Recommendation**: Specific remediation steps
 
 Group findings by severity, Critical first. If no security issues are found, confirm what was checked and state the PR is clean from a security perspective.
+
+**Example finding:**
+- **Location**: `src/api/search.ts:42`
+- **Severity**: Critical
+- **Category**: Injection
+- **Description**: User input from `req.query.q` is interpolated into a SQL query via template literal: `` `SELECT * FROM products WHERE name LIKE '%${q}%'` ``. An attacker can inject arbitrary SQL by passing `'; DROP TABLE products; --` as the search parameter.
+- **Recommendation**: Use parameterized queries: `db.query('SELECT * FROM products WHERE name LIKE $1', ['%' + q + '%'])`.
 
 ## Principles
 

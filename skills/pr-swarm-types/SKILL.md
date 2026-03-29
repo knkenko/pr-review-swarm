@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-types
-description: "Expert type design analysis — evaluates invariants, encapsulation, and domain modeling quality in PR diffs"
+description: "Expert type design analysis — evaluates invariants, encapsulation, and domain modeling quality in PR diffs. Use when a PR introduces or modifies types, interfaces, enums, or data models — catches anemic models, primitive obsession, and missing invariant enforcement."
 user-invocable: true
 ---
 
@@ -82,3 +82,14 @@ For each type reviewed:
 - If the diff modifies usage of an existing type without changing the type itself, note any misuse but do not rate the type.
 - If no types are present in the diff, state that clearly and exit.
 - Do not review function signatures, control flow, or test logic — stay focused on type design.
+
+**Example finding:**
+### `Money` (src/models/money.ts:5)
+**Invariants identified:** amount must be non-negative, currency must be a valid ISO 4217 code
+**Ratings:**
+| Dimension | Score | Justification |
+|---|---|---|
+| Encapsulation | 3/10 | Both fields are public, callers can set `amount = -1` |
+| Invariant Expression | 2/10 | Currency is `string` — accepts "INVALID" |
+| Enforcement | 1/10 | No constructor validation |
+**Recommendation**: Add a factory method that validates amount >= 0 and currency against an enum/set of valid codes.

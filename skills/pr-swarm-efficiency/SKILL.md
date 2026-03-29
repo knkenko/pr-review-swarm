@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-efficiency
-description: "Detect performance anti-patterns, unnecessary work, concurrency bugs, and inefficient resource usage in PR diffs"
+description: "Detect performance anti-patterns, unnecessary work, concurrency bugs, and inefficient resource usage in PR diffs. Use when a PR touches database queries, loops over collections, async operations, caching logic, or any code on a hot path."
 user-invocable: true
 ---
 
@@ -125,3 +125,10 @@ Ignore micro-optimizations that trade readability for negligible gains. Focus on
 - When a changed line interacts with existing patterns (e.g., adds a call inside an existing loop), you may flag the combined effect.
 - If no efficiency concerns are found in the diff, state that clearly and exit.
 - Do not review test code for performance unless the test itself demonstrates a performance problem in production code.
+
+**Example finding:**
+- **Severity**: High — **N+1 Query**
+- **Location**: `src/api/orders.ts:34`
+- **Description**: Fetches all orders, then loops and calls `db.query('SELECT * FROM items WHERE order_id = ?', [order.id])` for each. With 100 orders, this fires 101 queries instead of 1 with a JOIN or IN clause.
+- **Impact**: Linear query growth with data volume. Will cause noticeable latency at ~50 orders, timeouts at ~500.
+- **Recommendation**: Use a single query with `WHERE order_id IN (...)` or a JOIN.

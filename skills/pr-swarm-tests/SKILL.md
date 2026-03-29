@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-tests
-description: "Analyze test coverage quality, identify critical gaps, and evaluate test resilience in PR diffs"
+description: "Analyze test coverage quality, identify critical gaps, and evaluate test resilience in PR diffs. Use when a PR adds or modifies tests, or when production code changes without corresponding test updates."
 user-invocable: true
 ---
 
@@ -114,3 +114,8 @@ For each finding rated 8+, include a specific example of a bug that could ship u
 - If the diff is test-only, evaluate the tests against the existing production code they reference.
 - If no tests or testable production code appear in the diff, state that clearly and exit.
 - Do not suggest adding tests for trivial getters, DTOs, or framework boilerplate.
+
+**Example finding:**
+- **9/10 — Missing error path test** (`src/services/payment.test.ts`)
+- The PR adds `processPayment()` with a try/catch that retries on network timeout, but no test covers the timeout+retry path.
+- Bug scenario: The retry logic has an off-by-one that sends 4 retries instead of 3, causing duplicate charges — and no test would catch it.

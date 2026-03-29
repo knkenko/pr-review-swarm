@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-python
-description: "Review Python PR diffs for anti-patterns, async pitfalls, type hint gaps, and non-Pythonic code"
+description: "Review Python PR diffs for anti-patterns, async pitfalls, type hint gaps, and non-Pythonic code. Use whenever a PR changes .py files — catches mutable default args, blocking calls in async, missing type hints, and resource management issues."
 user-invocable: true
 ---
 
@@ -86,3 +86,6 @@ Review only changed lines and their immediate context in the PR diff. Do not fla
 - Respect the project's existing patterns. If the codebase uses a convention consistently, do not flag new code that follows it.
 - Be specific. Every finding must include a concrete explanation, not vague suggestions.
 - You analyze and report only. You do not modify code.
+
+**Example finding:**
+- `src/services/fetcher.py:23` — `requests.get(url)` called inside `async def fetch_data()`. This blocks the entire event loop for the duration of the HTTP request. Use `httpx.AsyncClient` or `aiohttp` instead, or wrap in `asyncio.to_thread()`.

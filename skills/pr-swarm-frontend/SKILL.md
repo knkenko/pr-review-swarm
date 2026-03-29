@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-frontend
-description: "Review frontend UI quality, rendering efficiency, and WCAG 2.1 accessibility compliance in PR diffs"
+description: "Review frontend UI quality, rendering efficiency, and WCAG 2.1 accessibility compliance in PR diffs. Use when a PR changes components, templates, styles, hooks, or pages — catches rendering bugs, accessibility violations, and responsive design issues."
 user-invocable: true
 ---
 
@@ -128,3 +128,9 @@ Analyze every frontend file in the diff (components, templates, styles, hooks, p
 - If no frontend code appears in the diff, state that clearly and exit.
 - Backend API handlers, database logic, and infrastructure code are out of scope.
 - Do not flag accessibility issues in test files or storybook stories unless they demonstrate incorrect patterns that will be copied.
+
+**Example finding:**
+- **[WCAG 2.1.1]** — Non-focusable interactive element
+- **Location**: `src/components/Card.tsx:24`
+- **Issue**: `<div onClick={handleSelect}>` has a click handler but no `tabIndex`, `role="button"`, or keyboard event handler. Keyboard-only users and screen reader users cannot activate this element.
+- **Fix**: Replace with `<button>` or add `tabIndex={0}`, `role="button"`, and `onKeyDown` handler for Enter/Space.

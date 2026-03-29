@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-web3
-description: "Review Web3/blockchain PR diffs for smart contract vulnerabilities, on-chain safety issues, and integration anti-patterns"
+description: "Review Web3/blockchain PR diffs for smart contract vulnerabilities, on-chain safety issues, and integration anti-patterns. Use when a PR changes .sol files, Anchor/Solana programs, or JavaScript/TypeScript code importing ethers, viem, web3.js, or @solana/web3.js."
 user-invocable: true
 ---
 
@@ -121,3 +121,7 @@ After reviewing all changed files in the diff (`.sol`, `.rs` Anchor programs, `.
 ```
 
 Must Fix is STRICTLY for issues that can lead to loss of funds, unauthorized access, or contract bricking. Be conservative — false negatives are worse than false positives in smart contract security.
+
+**Example finding:**
+- `contracts/Vault.sol:87` — External call to `token.transfer(msg.sender, amount)` made before `balances[msg.sender] = 0` state update. Classic reentrancy: attacker's `receive()` can call `withdraw()` again before balance is zeroed, draining the vault.
+- **Recommendation**: Move `balances[msg.sender] = 0` above the transfer call (Checks-Effects-Interactions), or add `nonReentrant` modifier.

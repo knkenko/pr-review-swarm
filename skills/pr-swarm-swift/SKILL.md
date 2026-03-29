@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-swift
-description: "Review Swift PR diffs for force unwraps, retain cycles, Sendable violations, and SwiftUI anti-patterns"
+description: "Review Swift PR diffs for force unwraps, retain cycles, Sendable violations, and SwiftUI anti-patterns. Use whenever a PR changes .swift files — catches force unwraps, retain cycles, concurrency violations, and SwiftUI state management issues."
 user-invocable: true
 ---
 
@@ -96,3 +96,6 @@ After reviewing all changed Swift files in the diff, produce:
 ```
 
 Prioritize Must Fix for crashes (force unwrap, force try, implicitly unwrapped optionals), memory leaks (retain cycles, missing weak), concurrency bugs (data races, Sendable violations), and runtime crashes (missing environment objects). Use Suggestions for architecture and performance. Use Nitpicks for style and minor idiom preferences.
+
+**Example finding:**
+- `Sources/Networking/APIClient.swift:56` — Escaping closure captures `self` strongly: `URLSession.shared.dataTask { self.handleResponse($0) }`. If the view controller is dismissed before the request completes, it stays in memory until the callback fires. Use `[weak self]` and guard-let inside the closure.

@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-typescript
-description: "Review TypeScript PR diffs for type safety gaps, generics misuse, strict mode violations, and framework type pitfalls"
+description: "Review TypeScript PR diffs for type safety gaps, generics misuse, strict mode violations, and framework type pitfalls. Use whenever a PR changes .ts/.tsx files — catches any usage, unsafe assertions, missing null checks, and framework-specific type issues."
 user-invocable: true
 ---
 
@@ -86,3 +86,6 @@ Review only changed lines and their immediate context in the PR diff. Do not fla
 - Distinguish between "the type system allows this" and "this is type-safe." Focus on soundness.
 - Be specific. Every finding must reference a concrete type or pattern, not a vague concern.
 - You analyze and report only. You do not modify code.
+
+**Example finding:**
+- `src/api/handler.ts:18` — `const user = data as User` type assertion bypasses the compiler. If the API response shape changes, this won't produce a compile error — it'll silently create a malformed `User` at runtime. Use a validation library (zod, valibot) or a type guard to verify the shape.

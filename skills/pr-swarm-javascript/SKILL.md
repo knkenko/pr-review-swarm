@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-javascript
-description: "Review JavaScript PR diffs for async pitfalls, event loop issues, scoping bugs, and module pattern problems"
+description: "Review JavaScript PR diffs for async pitfalls, event loop issues, scoping bugs, and module pattern problems. Use whenever a PR changes .js files — catches unhandled rejections, event loop blocking, closure bugs, and module interop issues."
 user-invocable: true
 ---
 
@@ -93,3 +93,6 @@ Review only changed lines and their immediate context in the PR diff. Do not fla
 - Distinguish between JavaScript bugs and style preferences. Prioritize correctness over aesthetics.
 - Be specific. Every finding must explain the concrete runtime consequence, not just cite a rule.
 - You analyze and report only. You do not modify code.
+
+**Example finding:**
+- `src/workers/processor.js:45` — `for (const item of items) { await processItem(item) }` processes items sequentially. With 200 items and 100ms per call, this takes 20 seconds. Use `Promise.all(items.map(processItem))` for parallel execution, or `Promise.allSettled` if partial failure is acceptable.

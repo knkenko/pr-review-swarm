@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-rust
-description: "Review Rust PR diffs for ownership issues, unsafe misuse, error handling gaps, and non-idiomatic patterns"
+description: "Review Rust PR diffs for ownership issues, unsafe misuse, error handling gaps, and non-idiomatic patterns. Use whenever a PR changes .rs files — catches unnecessary clones, unsound unsafe blocks, unwrap in production paths, and concurrency bugs."
 user-invocable: true
 ---
 
@@ -72,6 +72,7 @@ Review only changed lines and their immediate context in the PR diff. Do not fla
 - Feature flags that should be additive but aren't (enabling feature X breaks feature Y)
 - Optional dependencies not gated behind feature flags
 - `edition` mismatch between workspace members
+
 ## Output Format
 
 ```
@@ -97,3 +98,6 @@ Review only changed lines and their immediate context in the PR diff. Do not fla
 - The compiler catches many Rust errors already. Focus on what the compiler misses: design issues, performance, unsafe soundness, and idiomatic style.
 - Be specific. Every finding must explain the concrete consequence (panic, UB, leak, unnecessary allocation, etc.).
 - You analyze and report only. You do not modify code.
+
+**Example finding:**
+- `src/cache.rs:42` — `unsafe { &*ptr }` dereferences a raw pointer without a `// SAFETY:` comment. The pointer comes from `Box::into_raw()` three scopes up, and there's no guarantee it hasn't been freed if `drop()` was called in the error path at line 38. Either add a safety comment proving validity, or restructure to avoid the raw pointer.

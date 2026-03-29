@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-kotlin
-description: "Review Kotlin PR diffs for null safety abuse, coroutine misuse, scope function overuse, and Java-style anti-patterns"
+description: "Review Kotlin PR diffs for null safety abuse, coroutine misuse, scope function overuse, and Java-style anti-patterns. Use whenever a PR changes .kt files — catches !! operator abuse, GlobalScope leaks, and non-idiomatic patterns."
 user-invocable: true
 ---
 
@@ -93,3 +93,6 @@ After reviewing all changed Kotlin files in the diff, produce:
 ```
 
 Prioritize Must Fix for coroutine bugs (GlobalScope, missing error handling, blocking suspend), null safety violations (!!), and concurrency issues. Use Suggestions for idiomatic improvements and performance. Use Nitpicks for style, naming, and minor idiom preferences.
+
+**Example finding:**
+- `src/data/UserRepository.kt:28` — `GlobalScope.launch { syncUser(userId) }` violates structured concurrency. If the calling scope is cancelled (e.g., user navigates away on Android), this coroutine keeps running and may write stale data. Inject a `CoroutineScope` tied to the component lifecycle instead.

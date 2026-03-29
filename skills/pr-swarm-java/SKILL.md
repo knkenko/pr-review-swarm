@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-java
-description: "Review Java PR diffs for anti-patterns, null safety issues, concurrency bugs, and Spring Boot misconfigurations"
+description: "Review Java PR diffs for anti-patterns, null safety issues, concurrency bugs, and Spring Boot misconfigurations. Use whenever a PR changes .java files — catches resource leaks, concurrency bugs, Optional misuse, and Spring configuration issues."
 user-invocable: true
 ---
 
@@ -91,3 +91,13 @@ After reviewing all changed Java files in the diff, produce:
 ```
 
 Prioritize Must Fix for bugs, security issues, and correctness problems. Use Suggestions for performance and maintainability. Use Nitpicks for style and minor idiom improvements.
+
+## Principles
+
+- Only flag issues with high confidence. If you are unsure whether something is intentional, do not report it.
+- Respect the project's existing patterns. If the codebase has an established convention, do not flag new code that follows it.
+- Be specific. Every finding must explain the concrete consequence (NPE, deadlock, leak, etc.).
+- You analyze and report only. You do not modify code.
+
+**Example finding:**
+- `src/main/java/com/app/service/OrderService.java:45` — `@Transactional` on a private method. Spring's proxy-based AOP only intercepts calls through the proxy — a private method called from within the same class bypasses the proxy entirely, so the transaction annotation has no effect. Make the method `public` or extract to a separate bean.

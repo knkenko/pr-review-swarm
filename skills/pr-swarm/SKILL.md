@@ -62,7 +62,9 @@ Before anything else, check for existing review state:
 
 ## Phase 2: Initialize State and Launch Agent Swarm
 
-**HARD GATE: If `has_code`, minimum 3 agents. If `is_docs_only`, minimum 1. A single-agent review is not a review.**
+**HARD GATE: If `has_code`, minimum 3 agents. If `is_docs_only`, minimum 1.**
+
+A single-agent review misses cross-cutting concerns — security issues invisible to a code quality reviewer, duplication invisible to a security reviewer. The value of the swarm is overlapping coverage.
 
 ### Step 2a: Create review state
 
@@ -121,11 +123,14 @@ Write `docs/reviews/PR-{NUMBER}/_state.json`:
 
 **For each selected agent:**
 
-1. Read the agent's skill file from disk: `~/.claude/skills/{agent-name}/SKILL.md`
-   - If not found, fall back to the repo's own `skills/{agent-name}/SKILL.md`
-   - If neither exists, skip that agent and note in report
+1. Read the agent's skill file from disk. Search in order:
+   - `~/.agents/skills/{agent-name}/SKILL.md` (universal path)
+   - `~/.claude/skills/{agent-name}/SKILL.md` (Claude Code)
+   - `~/.cursor/skills/{agent-name}/SKILL.md` (Cursor)
+   - The repo's own `skills/{agent-name}/SKILL.md` (fallback)
+   - If none found, skip that agent and note in report
 2. Extract the prompt content (everything after the frontmatter `---`)
-3. Launch as `general-purpose` Agent with `run_in_background: true` and `model: "opus"`
+3. Launch as `general-purpose` Agent with `run_in_background: true`
 
 **Each agent prompt MUST include:**
 - The extracted skill prompt
@@ -160,11 +165,12 @@ Agents run in background. You are notified as each completes — do NOT poll or 
 2. If error/empty output, check if `.md` file exists on disk. Write fallback if needed.
 3. Update `_state.json`: set agent status to `completed` or `failed`.
 
-**Do NOT:**
-- Start reading findings before all agents return
-- Start compiling the report before all agents return
-- Skip ahead to Phase 4 while any agent is running
-- Start fixing code while agents are running
+**Do NOT proceed early — wait for all agents.** Compiling a partial report means de-duplication misses cross-agent overlap (agents often flag the same issue differently). Starting fixes while agents run risks editing files an agent is actively reading, corrupting its review.
+
+- Do NOT start reading findings before all agents return
+- Do NOT start compiling the report before all agents return
+- Do NOT skip ahead to Phase 4 while any agent is running
+- Do NOT start fixing code while agents are running
 
 **Timeout:** If one agent hasn't returned but all others completed 10+ minutes ago, mark as `failed` and proceed.
 
@@ -214,7 +220,8 @@ Agents run in background. You are notified as each completes — do NOT poll or 
 
 ## Phase 5: Fix Pass (Sequential)
 
-**STOP. Do NOT start fixing until ALL gates pass:**
+**STOP. Do NOT start fixing until ALL gates pass.** Fixing before the report is compiled means you'll miss findings, create partial fixes, and the PR comment won't reflect what was actually addressed. Fixing before user approval means you may change code the user wants left alone.
+
 1. Every agent has returned (Phase 3 complete)
 2. Compiled report written (Phase 4 step 4)
 3. Findings posted as PR comment (Phase 4 step 6)

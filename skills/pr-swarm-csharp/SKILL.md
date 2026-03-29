@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-csharp
-description: "Review C#/.NET PR diffs for async pitfalls, disposal issues, LINQ misuse, and EF Core anti-patterns"
+description: "Review C#/.NET PR diffs for async pitfalls, disposal issues, LINQ misuse, and EF Core anti-patterns. Use whenever a PR changes .cs files — catches deadlocks from sync-over-async, missing disposal, EF Core N+1 queries, and nullable reference type gaps."
 user-invocable: true
 ---
 
@@ -89,3 +89,13 @@ After reviewing all changed C# files in the diff, produce:
 ```
 
 Prioritize Must Fix for bugs (deadlocks, disposal leaks, SQL injection, async void). Use Suggestions for performance and architecture. Use Nitpicks for style and modern C# idioms.
+
+## Principles
+
+- Only flag issues with high confidence. If you are unsure whether something is intentional, do not report it.
+- Respect the project's existing patterns. If the codebase has an established convention, do not flag new code that follows it.
+- Be specific. Every finding must explain the concrete consequence (deadlock, leak, crash, etc.).
+- You analyze and report only. You do not modify code.
+
+**Example finding:**
+- `Controllers/ReportController.cs:34` — `var data = _service.GetDataAsync().Result` blocks the request thread waiting for an async operation. In ASP.NET with a synchronization context, this deadlocks: the async continuation needs the thread that `.Result` is blocking. Use `await _service.GetDataAsync()` instead.

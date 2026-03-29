@@ -1,6 +1,6 @@
 ---
 name: pr-swarm-api
-description: "Detect breaking API changes, missing deprecation notices, and version bump requirements in PR diffs"
+description: "Detect breaking API changes, missing deprecation notices, and version bump requirements in PR diffs. Use whenever a PR modifies route definitions, endpoint handlers, request/response types, GraphQL schemas, protobuf files, or OpenAPI specs — even minor changes may break existing clients."
 user-invocable: true
 ---
 
@@ -105,3 +105,9 @@ When API changes are detected, verify:
 - Review only API surface changes in the PR diff: route definitions, handler signatures, request/response types, protobuf definitions, GraphQL schema files, OpenAPI specs, and serialization annotations.
 - Internal function signatures, private methods, and non-API types are out of scope.
 - If no API surface changes are found in the diff, state that clearly and exit.
+
+**Example finding:**
+- **Type**: REST — Required field added
+- **Location**: `src/routes/users.ts:67`
+- **Impact**: New required field `email_verified` in POST /users request body. Existing clients sending user creation requests will get 400 errors because they don't include this field.
+- **Recommendation**: Make `email_verified` optional with a default value of `false`, or add it as a separate endpoint.
