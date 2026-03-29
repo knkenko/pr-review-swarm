@@ -4,6 +4,12 @@ Parallel PR review agent swarm for AI coding agents — launches up to 21 specia
 
 Works with Claude Code, Cursor, Windsurf, Codex, Gemini CLI, GitHub Copilot, Amp, Cline, Aider, and 30+ more AI coding agents via [`npx skills add`](https://github.com/vercel-labs/skills).
 
+```bash
+npx skills add knkenko/pr-review-swarm
+```
+
+Requires [GitHub CLI](https://cli.github.com) (`gh`). Installs 2 skills: the orchestrator (`pr-swarm`) and the grader (`pr-swarm-grade`). All 21 review agents are bundled inside the orchestrator.
+
 ## Why this exists
 
 Existing PR review tools run one check at a time. You launch them manually, read scattered outputs, fix by hand, and if your session crashes mid-review you start over.
@@ -15,18 +21,6 @@ pr-review-swarm fixes this:
 - **Compiled report** — de-duplicates findings across agents, categorizes as Must Fix / Suggestions / Nitpicks, posts as a GitHub PR comment
 - **Automated fix pass** — sequentially fixes findings with atomic commits, runs tests, reverts breaking changes
 - **Grading system** — cross-references the compiled report against actual diff, produces a letter-grade report card with dishonesty detection
-
-## Install
-
-Requires [GitHub CLI](https://cli.github.com) (`gh`) for PR interaction.
-
-```bash
-npx skills add knkenko/pr-review-swarm
-```
-
-Interactive TUI — auto-detects your AI coding agent, lets you pick which skills to install. Supports 40+ agents including Claude Code, Cursor, Windsurf, Codex, Gemini CLI, GitHub Copilot, and more.
-
-Installs 2 skills: the orchestrator (`pr-swarm`) and the grader (`pr-swarm-grade`). All 21 review agents are bundled inside the orchestrator.
 
 ## Usage
 
