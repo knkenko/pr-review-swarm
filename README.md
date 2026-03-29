@@ -1,37 +1,43 @@
 # pr-review-swarm
 
-Parallel PR review for Claude Code — one command launches up to 23 specialized agents, compiles a de-duplicated report, fixes findings, and grades the fix quality.
+Parallel PR review agent swarm — launches up to 23 specialized reviewers, compiles a de-duplicated report, fixes findings, and grades the fix quality.
 
 ## Why this exists
 
-Claude Code's built-in review agents are good individually, but there's no orchestration. You launch one at a time, read scattered outputs, fix manually, and if your session crashes mid-review you start over.
+Existing PR review agents work one at a time. You launch them manually, read scattered outputs, fix by hand, and if your session crashes mid-review you start over.
 
 pr-review-swarm fixes this:
 
 - **Parallel agent swarm** — auto-detects what's in the PR (languages, file types, patterns) and launches only the relevant agents simultaneously
-- **Crash-resilient state** — each agent writes its own findings file to `docs/reviews/PR-{N}/`. If your session dies, resume where you left off
+- **Crash-resilient state** — each agent writes its own findings file to `docs/reviews/PR-{N}/`. Session dies? Resume where you left off
 - **Compiled report** — de-duplicates findings across agents, categorizes as Must Fix / Suggestions / Nitpicks, posts as a PR comment
 - **Automated fix pass** — sequentially fixes findings with atomic commits, runs tests, reverts breaking changes
-- **Grading system** — `/pr-swarm-grade` cross-references the compiled report against actual diff, produces a letter-grade report card with dishonesty detection
+- **Grading system** — cross-references the compiled report against actual diff, produces a letter-grade report card with dishonesty detection
 
 ## Install
 
-Requires [Claude Code](https://claude.ai/code) and [GitHub CLI](https://cli.github.com) (`gh`).
+Requires [GitHub CLI](https://cli.github.com) (`gh`) for PR interaction.
 
 ```bash
-git clone https://github.com/knkenko/pr-review-swarm.git /tmp/pr-review-swarm && \
-  /tmp/pr-review-swarm/install.sh
+curl -fsSL https://raw.githubusercontent.com/knkenko/pr-review-swarm/main/install.sh | bash
 ```
 
-This copies all skills to `~/.claude/skills/pr-swarm-*/`. To update, run the same command again.
-
-### Manual install
-
-Copy the `skills/` directories into `~/.claude/skills/`:
+Or clone and run:
 
 ```bash
-cp -r skills/pr-swarm* ~/.claude/skills/
+git clone https://github.com/knkenko/pr-review-swarm.git
+cd pr-review-swarm
+./install.sh
 ```
+
+The installer auto-detects your agent and copies skills to the right location. Pass `--dir <path>` to install to a custom directory.
+
+Supported agents:
+
+| Agent | Skills directory | Auto-detected |
+|-------|-----------------|---------------|
+| Claude Code | `~/.claude/skills/` | Yes |
+| Custom | any path via `--dir` | — |
 
 ## Usage
 
@@ -63,7 +69,7 @@ Produces a letter-grade report card (A+ through F) by cross-referencing the comp
 
 ### Run a single agent
 
-Every agent is a standalone skill. Use any individually:
+Every agent is a standalone skill you can invoke directly:
 
 ```
 /pr-swarm-security
@@ -87,10 +93,10 @@ Every agent is a standalone skill. Use any individually:
 | `pr-swarm-dry` | has code | Cross-file duplication, missed utility reuse |
 | `pr-swarm-docs` | has code or docs-only | Comment accuracy, stale project documentation |
 | `pr-swarm-efficiency` | has code | N+1 queries, concurrency bugs, memory leaks, hot-path bloat |
-| `pr-swarm-types` | has .ts/.tsx/.py | Type design, invariant quality, encapsulation |
+| `pr-swarm-types` | has typed files | Type design, invariant quality, encapsulation |
 | `pr-swarm-tests` | has test files | Test coverage gaps, behavioral vs implementation testing |
 | `pr-swarm-api` | has routes/endpoints | Breaking changes, missing deprecation, version bump needs |
-| `pr-swarm-frontend` | has .tsx/.jsx/.vue/.svelte/.css | UI patterns, rendering efficiency, WCAG 2.1 accessibility |
+| `pr-swarm-frontend` | has frontend files | UI patterns, rendering efficiency, WCAG 2.1 accessibility |
 | `pr-swarm-web3` | has .sol or web3 imports | Solidity security, Anchor/Solana patterns, gas optimization |
 
 ### Language-specific (auto-detected)
@@ -108,7 +114,7 @@ Every agent is a standalone skill. Use any individually:
 
 ## How it works
 
-The orchestrator (`pr-swarm`) reads each agent's skill file from `~/.claude/skills/`, extracts the prompt, and launches it as a background agent scoped to the PR diff. No plugin dependencies — everything is a markdown file on disk.
+The orchestrator reads each agent's prompt file from disk and launches it as a background agent scoped to the PR diff. No external dependencies — everything is a markdown file.
 
 Each agent writes findings to `docs/reviews/PR-{N}/{agent-name}.md`. If your session crashes, the orchestrator detects existing state on next run and offers to resume.
 

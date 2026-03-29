@@ -1,50 +1,76 @@
 #!/bin/bash
 set -e
 
-REPO_URL="https://github.com/knkenko/pr-review-swarm"
-SKILLS_DIR="$HOME/.claude/skills"
-TEMP_DIR=$(mktemp -d)
+SKILLS_DIR=""
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-echo "Installing pr-review-swarm..."
+# Parse args
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --dir)
+      SKILLS_DIR="$2"
+      shift 2
+      ;;
+    --help|-h)
+      echo "Usage: install.sh [--dir <path>]"
+      echo ""
+      echo "Installs pr-review-swarm skills to the detected agent's skills directory."
+      echo ""
+      echo "Options:"
+      echo "  --dir <path>  Install to a custom directory"
+      echo ""
+      echo "Auto-detected locations:"
+      echo "  Claude Code   ~/.claude/skills/"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Run with --help for usage."
+      exit 1
+      ;;
+  esac
+done
 
-# Clone repo
-git clone --depth 1 "$REPO_URL" "$TEMP_DIR" 2>/dev/null || {
-  echo "Error: Failed to clone repo. Make sure you have access to $REPO_URL"
-  rm -rf "$TEMP_DIR"
-  exit 1
-}
-
-# Create skills directory if needed
-mkdir -p "$SKILLS_DIR"
-
-# Copy all skills
-INSTALLED=0
-for skill_dir in "$TEMP_DIR"/skills/pr-swarm*/; do
-  skill_name=$(basename "$skill_dir")
-  target="$SKILLS_DIR/$skill_name"
-
-  if [ -d "$target" ]; then
-    echo "  Updating $skill_name"
+# Auto-detect if no --dir provided
+if [ -z "$SKILLS_DIR" ]; then
+  if [ -d "$HOME/.claude" ]; then
+    SKILLS_DIR="$HOME/.claude/skills"
+    echo "Detected: Claude Code → $SKILLS_DIR"
   else
-    echo "  Installing $skill_name"
+    echo "Could not auto-detect agent. Use --dir <path> to specify install location."
+    exit 1
   fi
+fi
 
+# Find skills source — either local clone or download
+if [ -d "$SCRIPT_DIR/skills" ]; then
+  SOURCE="$SCRIPT_DIR/skills"
+else
+  TEMP_DIR=$(mktemp -d)
+  trap "rm -rf $TEMP_DIR" EXIT
+  echo "Downloading..."
+  git clone --depth 1 https://github.com/knkenko/pr-review-swarm.git "$TEMP_DIR" 2>/dev/null || {
+    echo "Error: Failed to download. Check your access to the repository."
+    exit 1
+  }
+  SOURCE="$TEMP_DIR/skills"
+fi
+
+# Install
+mkdir -p "$SKILLS_DIR"
+INSTALLED=0
+for skill_dir in "$SOURCE"/pr-swarm*/; do
+  [ -d "$skill_dir" ] || continue
+  name=$(basename "$skill_dir")
+  target="$SKILLS_DIR/$name"
   mkdir -p "$target"
   cp "$skill_dir/SKILL.md" "$target/SKILL.md"
   INSTALLED=$((INSTALLED + 1))
 done
 
-# Cleanup
-rm -rf "$TEMP_DIR"
-
+echo "Installed $INSTALLED skills to $SKILLS_DIR"
 echo ""
-echo "Installed $INSTALLED skills."
-echo ""
-echo "Usage:"
-echo "  /pr-swarm          — Run full parallel PR review"
-echo "  /pr-swarm-grade    — Grade fix quality after review"
-echo "  /pr-swarm-code     — Run code quality review only"
-echo "  /pr-swarm-security — Run security review only"
-echo "  ... and 19 more specialized reviewers"
-echo ""
-echo "Requirements: GitHub CLI (gh) must be installed and authenticated."
+echo "Commands:"
+echo "  /pr-swarm          Full parallel PR review"
+echo "  /pr-swarm-grade    Grade fix quality"
+echo "  /pr-swarm-*        Run any individual reviewer"
