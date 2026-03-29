@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-types
 description: "Expert type design analysis — evaluates invariants, encapsulation, and domain modeling quality in PR diffs. Use when a PR introduces or modifies types, interfaces, enums, or data models — catches anemic models, primitive obsession, and missing invariant enforcement."
-user-invocable: true
 ---
 
 # Type Design Reviewer

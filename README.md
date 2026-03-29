@@ -24,6 +24,8 @@ npx skills add knkenko/pr-review-swarm
 
 Interactive TUI — auto-detects your AI coding agent, lets you pick which skills to install. Supports 40+ agents including Claude Code, Cursor, Windsurf, Codex, Gemini CLI, and more.
 
+Installs 2 skills: the orchestrator (`pr-swarm`) and the grader (`pr-swarm-grade`). All 21 review agents are bundled inside the orchestrator.
+
 ## Usage
 
 ### Full review
@@ -42,6 +44,13 @@ This will:
 5. Post findings as a PR comment
 6. Ask if you want to fix findings
 
+### Run specific agents
+
+```
+/pr-swarm security          — run only the security agent
+/pr-swarm python typescript — run Python and TypeScript agents only
+```
+
 ### Grade a fix pass
 
 After `/pr-swarm` fixes findings:
@@ -52,54 +61,44 @@ After `/pr-swarm` fixes findings:
 
 Produces a letter-grade report card (A+ through F) by cross-referencing the compiled report against the actual diff. Catches dishonest claims, undocumented skips, and regressions.
 
-### Run a single agent
-
-Every agent is a standalone skill you can invoke directly:
-
-```
-/pr-swarm-security
-/pr-swarm-python
-/pr-swarm-api
-```
-
 ## Agents
 
 ### Always run
 | Agent | What it checks |
 |-------|---------------|
-| `pr-swarm-code` | Code quality, bug detection, project convention compliance |
-| `pr-swarm-security` | OWASP Top 10, secrets, dependency risks, infrastructure misconfigs, supply chain |
+| `code` | Code quality, bug detection, project convention compliance |
+| `security` | OWASP Top 10, secrets, dependency risks, infrastructure misconfigs, supply chain |
 
 ### Conditional (based on PR content)
 | Agent | Runs when | What it checks |
 |-------|-----------|---------------|
-| `pr-swarm-errors` | has code | Silent failures, inadequate catch blocks, hidden error paths |
-| `pr-swarm-simplify` | has code | Unnecessary complexity, redundant state, parameter sprawl, copy-paste |
-| `pr-swarm-dry` | has code | Cross-file duplication, missed utility reuse |
-| `pr-swarm-docs` | has code or docs-only | Comment accuracy, stale project documentation |
-| `pr-swarm-efficiency` | has code | N+1 queries, concurrency bugs, memory leaks, hot-path bloat |
-| `pr-swarm-types` | has typed files | Type design, invariant quality, encapsulation |
-| `pr-swarm-tests` | has test files | Test coverage gaps, behavioral vs implementation testing |
-| `pr-swarm-api` | has routes/endpoints | Breaking changes, missing deprecation, version bump needs |
-| `pr-swarm-frontend` | has frontend files | UI patterns, rendering efficiency, WCAG 2.1 accessibility |
-| `pr-swarm-web3` | has .sol or web3 imports | Solidity security, Anchor/Solana patterns, gas optimization |
+| `errors` | has code | Silent failures, inadequate catch blocks, hidden error paths |
+| `simplify` | has code | Unnecessary complexity, redundant state, parameter sprawl, copy-paste |
+| `dry` | has code | Cross-file duplication, missed utility reuse |
+| `docs` | has code or docs-only | Comment accuracy, stale project documentation |
+| `efficiency` | has code | N+1 queries, concurrency bugs, memory leaks, hot-path bloat |
+| `types` | has typed files | Type design, invariant quality, encapsulation |
+| `tests` | has test files | Test coverage gaps, behavioral vs implementation testing |
+| `api` | has routes/endpoints | Breaking changes, missing deprecation, version bump needs |
+| `frontend` | has frontend files | UI patterns, rendering efficiency, WCAG 2.1 accessibility |
+| `web3` | has .sol or web3 imports | Solidity security, Anchor/Solana patterns, gas optimization |
 
 ### Language-specific (auto-detected)
 | Agent | Language |
 |-------|----------|
-| `pr-swarm-python` | Python — idioms, async pitfalls, type hints |
-| `pr-swarm-typescript` | TypeScript — type safety, generics, strict mode |
-| `pr-swarm-javascript` | JavaScript — async patterns, event loop, module issues |
-| `pr-swarm-go` | Go — error handling, goroutine leaks, channel misuse |
-| `pr-swarm-rust` | Rust — ownership, unsafe, lifetimes, error handling |
-| `pr-swarm-java` | Java — modern patterns, null safety, Spring Boot |
-| `pr-swarm-csharp` | C# — async/await, disposal, LINQ, EF Core |
-| `pr-swarm-kotlin` | Kotlin — null safety, coroutines, scope functions |
-| `pr-swarm-swift` | Swift — optionals, ARC, Sendable, SwiftUI |
+| `python` | Python — idioms, async pitfalls, type hints |
+| `typescript` | TypeScript — type safety, generics, strict mode |
+| `javascript` | JavaScript — async patterns, event loop, module issues |
+| `go` | Go — error handling, goroutine leaks, channel misuse |
+| `rust` | Rust — ownership, unsafe, lifetimes, error handling |
+| `java` | Java — modern patterns, null safety, Spring Boot |
+| `csharp` | C# — async/await, disposal, LINQ, EF Core |
+| `kotlin` | Kotlin — null safety, coroutines, scope functions |
+| `swift` | Swift — optionals, ARC, Sendable, SwiftUI |
 
 ## How it works
 
-The orchestrator reads each agent's prompt file from disk and launches it as a background agent scoped to the PR diff. No external dependencies — everything is a markdown file.
+All 21 review agents are bundled as markdown files inside the orchestrator (`skills/pr-swarm/agents/*.md`). The orchestrator reads each agent's prompt, appends the PR context, and launches it as a background subagent scoped to the diff. No external dependencies — everything is a markdown file.
 
 Each agent writes findings to `docs/reviews/PR-{N}/{agent-name}.md`. If your session crashes, the orchestrator detects existing state on next run and offers to resume.
 

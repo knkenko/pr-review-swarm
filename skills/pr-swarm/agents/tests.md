@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-tests
 description: "Analyze test coverage quality, identify critical gaps, and evaluate test resilience in PR diffs. Use when a PR adds or modifies tests, or when production code changes without corresponding test updates."
-user-invocable: true
 ---
 
 # Test Quality Reviewer

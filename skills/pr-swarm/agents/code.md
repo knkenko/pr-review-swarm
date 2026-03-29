@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-code
 description: "Expert code reviewer for project guidelines, style, best practices, and bug detection with confidence scoring. Use this for any PR review where you want a general quality check — catches bugs, convention violations, and quality issues across all languages."
-user-invocable: true
 ---
 
 # Code Quality Reviewer

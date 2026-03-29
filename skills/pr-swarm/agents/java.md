@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-java
 description: "Review Java PR diffs for anti-patterns, null safety issues, concurrency bugs, and Spring Boot misconfigurations. Use whenever a PR changes .java files — catches resource leaks, concurrency bugs, Optional misuse, and Spring configuration issues."
-user-invocable: true
 ---
 
 # Java PR Review Agent

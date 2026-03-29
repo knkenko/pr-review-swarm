@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-errors
 description: "Error handling auditor hunting silent failures, inadequate catch blocks, and hidden error paths in PR diffs. Use when a PR contains try/catch blocks, error callbacks, fallback logic, or any code that handles failure conditions."
-user-invocable: true
 ---
 
 # Error Handling Reviewer

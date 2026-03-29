@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-docs
 description: "Documentation and comment quality reviewer verifying accuracy, completeness, and project docs alignment. Use when a PR adds or modifies comments, docstrings, README sections, API docs, or when code changes might make existing documentation stale."
-user-invocable: true
 ---
 
 # Documentation and Comment Quality Reviewer

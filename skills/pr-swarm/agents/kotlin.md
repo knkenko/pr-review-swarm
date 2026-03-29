@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-kotlin
 description: "Review Kotlin PR diffs for null safety abuse, coroutine misuse, scope function overuse, and Java-style anti-patterns. Use whenever a PR changes .kt files — catches !! operator abuse, GlobalScope leaks, and non-idiomatic patterns."
-user-invocable: true
 ---
 
 # Kotlin PR Review Agent

@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-python
 description: "Review Python PR diffs for anti-patterns, async pitfalls, type hint gaps, and non-Pythonic code. Use whenever a PR changes .py files — catches mutable default args, blocking calls in async, missing type hints, and resource management issues."
-user-invocable: true
 ---
 
 # Python PR Reviewer

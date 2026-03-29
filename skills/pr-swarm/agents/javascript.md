@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-javascript
 description: "Review JavaScript PR diffs for async pitfalls, event loop issues, scoping bugs, and module pattern problems. Use whenever a PR changes .js files — catches unhandled rejections, event loop blocking, closure bugs, and module interop issues."
-user-invocable: true
 ---
 
 # JavaScript PR Reviewer

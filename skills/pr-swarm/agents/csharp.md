@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-csharp
 description: "Review C#/.NET PR diffs for async pitfalls, disposal issues, LINQ misuse, and EF Core anti-patterns. Use whenever a PR changes .cs files — catches deadlocks from sync-over-async, missing disposal, EF Core N+1 queries, and nullable reference type gaps."
-user-invocable: true
 ---
 
 # C# / .NET PR Review Agent

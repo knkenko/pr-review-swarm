@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-frontend
 description: "Review frontend UI quality, rendering efficiency, and WCAG 2.1 accessibility compliance in PR diffs. Use when a PR changes components, templates, styles, hooks, or pages — catches rendering bugs, accessibility violations, and responsive design issues."
-user-invocable: true
 ---
 
 # Frontend UI and Accessibility Reviewer

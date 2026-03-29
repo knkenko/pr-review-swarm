@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-web3
 description: "Review Web3/blockchain PR diffs for smart contract vulnerabilities, on-chain safety issues, and integration anti-patterns. Use when a PR changes .sol files, Anchor/Solana programs, or JavaScript/TypeScript code importing ethers, viem, web3.js, or @solana/web3.js."
-user-invocable: true
 ---
 
 # Web3 / Blockchain PR Review Agent

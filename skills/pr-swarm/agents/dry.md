@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-dry
 description: "DRY and reuse analysis reviewer detecting cross-file duplication, missed utility reuse, and extraction opportunities. Use when a PR introduces new functions, utilities, or helpers — catches cases where existing code already does the same thing."
-user-invocable: true
 ---
 
 # DRY / Reuse Analysis Reviewer

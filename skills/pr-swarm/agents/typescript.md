@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-typescript
 description: "Review TypeScript PR diffs for type safety gaps, generics misuse, strict mode violations, and framework type pitfalls. Use whenever a PR changes .ts/.tsx files — catches any usage, unsafe assertions, missing null checks, and framework-specific type issues."
-user-invocable: true
 ---
 
 # TypeScript PR Reviewer

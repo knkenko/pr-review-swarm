@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-efficiency
 description: "Detect performance anti-patterns, unnecessary work, concurrency bugs, and inefficient resource usage in PR diffs. Use when a PR touches database queries, loops over collections, async operations, caching logic, or any code on a hot path."
-user-invocable: true
 ---
 
 # Performance and Efficiency Reviewer

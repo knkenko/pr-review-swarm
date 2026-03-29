@@ -8,6 +8,19 @@ allowed-tools: [Bash, Read, Glob, Grep, Edit, Write, Agent]
 Review the current PR using a parallel agent swarm, then address all findings.
 Agent findings persist to `docs/reviews/` so reviews survive session crashes.
 
+## Single-Agent Mode
+
+If the user specifies agent names, run only those agents instead of auto-detecting:
+
+```
+/pr-swarm security          — run only the security agent
+/pr-swarm python typescript — run only Python and TypeScript agents
+```
+
+Valid agent short names: `api`, `code`, `csharp`, `docs`, `dry`, `efficiency`, `errors`, `frontend`, `go`, `java`, `javascript`, `kotlin`, `python`, `rust`, `security`, `simplify`, `swift`, `tests`, `types`, `typescript`, `web3`.
+
+When in single-agent mode, skip Phase 1 detection flags — just launch the requested agents directly. The rest of the workflow (state, collection, compile, fix) is unchanged.
+
 ## Branch Safety
 
 All phases run on the PR branch. NEVER `git checkout main` or switch branches.
@@ -95,42 +108,43 @@ Write `docs/reviews/PR-{NUMBER}/_state.json`:
 **Agent selection based on detection flags:**
 
 **Always run** (skip only if `is_docs_only`):
-- `pr-swarm-code` — general code quality
-- `pr-swarm-security` — security + deps + infra
+- `code` — general code quality
+- `security` — security + deps + infra
 
 **Run when applicable:**
-- `pr-swarm-errors` — if `has_error_handling` or `has_code`
-- `pr-swarm-simplify` — if `has_code`
-- `pr-swarm-dry` — if `has_code`
-- `pr-swarm-docs` — if `has_code` or `is_docs_only`
-- `pr-swarm-types` — if `has_types`
-- `pr-swarm-tests` — if `has_tests`
-- `pr-swarm-efficiency` — if `has_code`
-- `pr-swarm-api` — if `has_api`
-- `pr-swarm-frontend` — if `has_frontend`
-- `pr-swarm-web3` — if `has_web3`
+- `errors` — if `has_error_handling` or `has_code`
+- `simplify` — if `has_code`
+- `dry` — if `has_code`
+- `docs` — if `has_code` or `is_docs_only`
+- `types` — if `has_types`
+- `tests` — if `has_tests`
+- `efficiency` — if `has_code`
+- `api` — if `has_api`
+- `frontend` — if `has_frontend`
+- `web3` — if `has_web3`
 
 **Language-specific** (auto-select based on detected languages):
-- `pr-swarm-python` — if Python detected
-- `pr-swarm-typescript` — if TypeScript detected
-- `pr-swarm-javascript` — if JavaScript detected
-- `pr-swarm-go` — if Go detected
-- `pr-swarm-rust` — if Rust detected
-- `pr-swarm-java` — if Java detected
-- `pr-swarm-csharp` — if C# detected
-- `pr-swarm-kotlin` — if Kotlin detected
-- `pr-swarm-swift` — if Swift detected
+- `python` — if Python detected
+- `typescript` — if TypeScript detected
+- `javascript` — if JavaScript detected
+- `go` — if Go detected
+- `rust` — if Rust detected
+- `java` — if Java detected
+- `csharp` — if C# detected
+- `kotlin` — if Kotlin detected
+- `swift` — if Swift detected
 
 **For each selected agent:**
 
-1. Read the agent's skill file from disk. Search in order:
-   - `~/.agents/skills/{agent-name}/SKILL.md` (universal path)
-   - `~/.claude/skills/{agent-name}/SKILL.md` (Claude Code)
-   - `~/.cursor/skills/{agent-name}/SKILL.md` (Cursor)
-   - The repo's own `skills/{agent-name}/SKILL.md` (fallback)
-   - If none found, skip that agent and note in report
-2. Extract the prompt content (everything after the frontmatter `---`)
-3. Launch as `general-purpose` Agent with `run_in_background: true`
+1. Locate the bundled agents directory. Search in order:
+   - `~/.agents/skills/pr-swarm/agents/` (universal path)
+   - `~/.claude/skills/pr-swarm/agents/` (Claude Code)
+   - `~/.cursor/skills/pr-swarm/agents/` (Cursor)
+   - `./skills/pr-swarm/agents/` (local repo fallback)
+   - Use the first path that contains `.md` files
+2. Read the agent's prompt file: `{agents_dir}/{agent-short-name}.md` (e.g., `agents/security.md`)
+3. Extract the prompt content (everything after the frontmatter `---`)
+4. Launch as `general-purpose` Agent with `run_in_background: true`
 
 **Each agent prompt MUST include:**
 - The extracted skill prompt
@@ -141,7 +155,7 @@ Write `docs/reviews/PR-{NUMBER}/_state.json`:
 
 **Self-Persistence Instruction (REQUIRED in every agent prompt):**
 
-> After completing your review, you MUST write your findings to `docs/reviews/PR-{NUMBER}/{agent-name}.md` using the Write tool. Format:
+> After completing your review, you MUST write your findings to `docs/reviews/PR-{NUMBER}/{agent-short-name}.md` (e.g., `security.md`, `python.md`) using the Write tool. Format:
 > - **Summary** (1-2 sentences)
 > - **Must Fix** (bulleted list with `file:line` references)
 > - **Suggestions** (bulleted list with `file:line` references)

@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-security
 description: "Security-focused PR reviewer covering OWASP Top 10, secrets detection, dependency risks, and infrastructure misconfigs. Use when reviewing any PR that touches authentication, authorization, API endpoints, environment variables, dependencies, Dockerfiles, CI/CD configs, or code handling user input — even if security isn't the stated focus."
-user-invocable: true
 ---
 
 # Security Reviewer

@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-rust
 description: "Review Rust PR diffs for ownership issues, unsafe misuse, error handling gaps, and non-idiomatic patterns. Use whenever a PR changes .rs files — catches unnecessary clones, unsound unsafe blocks, unwrap in production paths, and concurrency bugs."
-user-invocable: true
 ---
 
 # Rust PR Reviewer

@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-simplify
 description: "Code simplification reviewer identifying unnecessary complexity, redundancy, and maintainability issues in PR diffs. Use when a PR adds substantial new code — catches over-abstraction, dead code, redundant state, parameter sprawl, and copy-paste patterns."
-user-invocable: true
 ---
 
 # Code Simplification Reviewer

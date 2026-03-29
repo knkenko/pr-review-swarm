@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-swift
 description: "Review Swift PR diffs for force unwraps, retain cycles, Sendable violations, and SwiftUI anti-patterns. Use whenever a PR changes .swift files — catches force unwraps, retain cycles, concurrency violations, and SwiftUI state management issues."
-user-invocable: true
 ---
 
 # Swift PR Review Agent

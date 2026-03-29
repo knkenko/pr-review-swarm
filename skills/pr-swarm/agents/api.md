@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-api
 description: "Detect breaking API changes, missing deprecation notices, and version bump requirements in PR diffs. Use whenever a PR modifies route definitions, endpoint handlers, request/response types, GraphQL schemas, protobuf files, or OpenAPI specs — even minor changes may break existing clients."
-user-invocable: true
 ---
 
 # API Breaking Change Reviewer

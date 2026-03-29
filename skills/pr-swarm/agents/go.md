@@ -1,7 +1,6 @@
 ---
 name: pr-swarm-go
 description: "Review Go PR diffs for error handling gaps, goroutine leaks, channel misuse, and non-idiomatic patterns. Use whenever a PR changes .go files — catches unchecked errors, goroutine leaks, context misuse, and defer pitfalls."
-user-invocable: true
 ---
 
 # Go PR Reviewer
