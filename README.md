@@ -19,25 +19,10 @@ pr-review-swarm fixes this:
 Requires [GitHub CLI](https://cli.github.com) (`gh`) for PR interaction.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/knkenko/pr-review-swarm/main/install.sh | bash
+npx skills add knkenko/pr-review-swarm
 ```
 
-Or clone and run:
-
-```bash
-git clone https://github.com/knkenko/pr-review-swarm.git
-cd pr-review-swarm
-./install.sh
-```
-
-The installer auto-detects your agent and copies skills to the right location. Pass `--dir <path>` to install to a custom directory.
-
-Supported agents:
-
-| Agent | Skills directory | Auto-detected |
-|-------|-----------------|---------------|
-| Claude Code | `~/.claude/skills/` | Yes |
-| Custom | any path via `--dir` | — |
+Interactive TUI — auto-detects your AI coding agent, lets you pick which skills to install. Supports 40+ agents including Claude Code, Cursor, Windsurf, Codex, Gemini CLI, and more.
 
 ## Usage
 
