@@ -1,16 +1,18 @@
 # pr-review-swarm
 
-Parallel PR review agent swarm — launches up to 23 specialized reviewers, compiles a de-duplicated report, fixes findings, and grades the fix quality.
+Parallel PR review agent swarm for AI coding agents — launches up to 21 specialized reviewers, compiles a de-duplicated report, fixes findings, and grades the fix quality.
+
+Works with Claude Code, Cursor, Windsurf, Codex, Gemini CLI, GitHub Copilot, Amp, Cline, Aider, and 30+ more AI coding agents via [`npx skills add`](https://github.com/vercel-labs/skills).
 
 ## Why this exists
 
-Existing PR review agents work one at a time. You launch them manually, read scattered outputs, fix by hand, and if your session crashes mid-review you start over.
+Existing PR review tools run one check at a time. You launch them manually, read scattered outputs, fix by hand, and if your session crashes mid-review you start over.
 
 pr-review-swarm fixes this:
 
-- **Parallel agent swarm** — auto-detects what's in the PR (languages, file types, patterns) and launches only the relevant agents simultaneously
+- **Parallel agent swarm** — auto-detects what's in the PR (languages, file types, patterns) and launches only the relevant review agents simultaneously
 - **Crash-resilient state** — each agent writes its own findings file to `docs/reviews/PR-{N}/`. Session dies? Resume where you left off
-- **Compiled report** — de-duplicates findings across agents, categorizes as Must Fix / Suggestions / Nitpicks, posts as a PR comment
+- **Compiled report** — de-duplicates findings across agents, categorizes as Must Fix / Suggestions / Nitpicks, posts as a GitHub PR comment
 - **Automated fix pass** — sequentially fixes findings with atomic commits, runs tests, reverts breaking changes
 - **Grading system** — cross-references the compiled report against actual diff, produces a letter-grade report card with dishonesty detection
 
@@ -22,7 +24,7 @@ Requires [GitHub CLI](https://cli.github.com) (`gh`) for PR interaction.
 npx skills add knkenko/pr-review-swarm
 ```
 
-Interactive TUI — auto-detects your AI coding agent, lets you pick which skills to install. Supports 40+ agents including Claude Code, Cursor, Windsurf, Codex, Gemini CLI, and more.
+Interactive TUI — auto-detects your AI coding agent, lets you pick which skills to install. Supports 40+ agents including Claude Code, Cursor, Windsurf, Codex, Gemini CLI, GitHub Copilot, and more.
 
 Installs 2 skills: the orchestrator (`pr-swarm`) and the grader (`pr-swarm-grade`). All 21 review agents are bundled inside the orchestrator.
 
@@ -103,6 +105,10 @@ All 21 review agents are bundled as markdown files inside the orchestrator (`ski
 Each agent writes findings to `docs/reviews/PR-{N}/{agent-name}.md`. If your session crashes, the orchestrator detects existing state on next run and offers to resume.
 
 After all agents return, findings are de-duplicated (multiple agents flagging the same file:line), categorized, and posted as a single PR comment.
+
+## Supported languages
+
+Python, TypeScript, JavaScript, Go, Rust, Java, C#, Kotlin, Swift, Solidity — plus language-agnostic agents for security, code quality, error handling, DRY analysis, performance, API design, frontend/accessibility, testing, type design, and documentation.
 
 ## License
 

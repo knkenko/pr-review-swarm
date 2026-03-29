@@ -1,0 +1,8 @@
+# Runtime review output
+docs/reviews/
+
+# OS
+.DS_Store
+
+# Node (if skills installer runs here)
+node_modules/
