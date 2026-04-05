@@ -203,34 +203,75 @@ Agents run in background. You are notified as each completes — do NOT poll or 
    - **Suggestions** — improvements, better patterns, performance, readability
    - **Nitpicks** — style, naming, minor preferences
 
-4. **Write compiled report** to `docs/reviews/PR-{NUMBER}/compiled-report.md`
+4. **Number every finding sequentially** — assign a single global number (1, 2, 3…) across all categories. Must Fix items come first, then Suggestions, then Nitpicks. This number is the finding's permanent ID and MUST be used consistently in the compiled report, the PR comment, the in-conversation presentation, and the resolution checklist in Phase 5. If the compiled report has 14 findings, they are numbered 1–14 — no gaps, no duplicates.
 
-5. **Update `_state.json`:** set phase to `done`, compiled to `true`
+5. **Write compiled report** to `docs/reviews/PR-{NUMBER}/compiled-report.md`
 
-6. **Post as PR comment:**
+   The report must list every finding with its number, location, source agent(s), and description. Use this structure:
+
+   ```markdown
+   # Compiled Review — PR #{NUMBER}: {TITLE}
+
+   **Summary:** N files reviewed, M agents ran, T total findings
+
+   ## Must Fix (X items)
+
+   **#1** · `file:line` · [agent1, agent2]
+   Description of the finding.
+
+   **#2** · `file:line` · [agent1]
+   Description of the finding.
+
+   ## Suggestions (Y items)
+
+   **#3** · `file:line` · [agent1]
+   Description of the finding.
+
+   ## Nitpicks (Z items)
+
+   **#4** · `file:line` · [agent1]
+   Description of the finding.
+
+   ---
+   **Total findings: T** (Must Fix: X, Suggestions: Y, Nitpicks: Z)
+   ```
+
+   The **Total findings** line at the bottom is a hard requirement — it anchors the count so the resolution checklist in Phase 5 can verify nothing was dropped.
+
+6. **Update `_state.json`:** set phase to `done`, compiled to `true`
+
+7. **Post as PR comment:**
    ```bash
    gh pr comment {NUMBER} --body "$(cat <<'EOF'
    ## PR Review Swarm — Findings
 
-   **Summary:** N files reviewed, M agents ran (list areas)
+   **Summary:** N files reviewed, M agents ran, T total findings
 
-   **Must Fix (N items)**
-   - [ ] `file:line` — [agent] description
+   **Must Fix (X items)**
+   - [ ] #1 · `file:line` — [agent] description
+   - [ ] #2 · `file:line` — [agent] description
 
-   **Suggestions (N items)**
-   - [ ] `file:line` — [agent] description
+   **Suggestions (Y items)**
+   - [ ] #3 · `file:line` — [agent] description
 
-   **Nitpicks (N items)**
-   - [ ] `file:line` — [agent] description
+   **Nitpicks (Z items)**
+   - [ ] #4 · `file:line` — [agent] description
+
+   **Total findings: T** (Must Fix: X, Suggestions: Y, Nitpicks: Z)
 
    *Agents: {list of agents that ran}*
    EOF
    )"
    ```
 
-7. **Present the report** to the user in conversation.
+8. **Present the report** to the user in conversation.
 
-8. **Ask:** "Want me to address all findings, pick specific items, or skip?"
+9. **Ask:** "Want me to address all findings, pick specific items, or skip?"
+
+   **Interpreting the user's response:**
+   - **"address all" / "fix all" / "all"** → Every finding must be resolved. "Resolved" means the code is changed to address it. The only acceptable exceptions are findings that are genuinely not applicable (the agent's analysis was wrong, or the code doesn't exist). "Intentionally deferred" is NOT allowed when the user says "all" — they are explicitly telling you not to defer. Do not silently downgrade suggestions or nitpicks to deferred. Do not skip items because they seem minor. The user said all and they mean all.
+   - **"pick specific items"** → User will list items by number. Only address those.
+   - **"skip"** → Do not fix anything.
 
 ## Phase 5: Fix Pass (Sequential)
 
@@ -238,9 +279,9 @@ Agents run in background. You are notified as each completes — do NOT poll or 
 
 1. Every agent has returned (Phase 3 complete)
 2. Compiled report written (Phase 4 step 4)
-3. Findings posted as PR comment (Phase 4 step 6)
-4. Report presented to user (Phase 4 step 7)
-5. User has responded with their choice (Phase 4 step 8)
+3. Findings posted as PR comment (Phase 4 step 7)
+4. Report presented to user (Phase 4 step 8)
+5. User has responded with their choice (Phase 4 step 9)
 
 **If ANY gate is false, do NOT touch code files.**
 
@@ -253,25 +294,41 @@ Agents run in background. You are notified as each completes — do NOT poll or 
 - Read target file(s) before editing
 - Each logical fix or small group = 1 commit with descriptive message
 - **Scope guard:** Only change what the finding describes
-- **Skip policy:** If fix requires architectural changes beyond scope, skip and document why
+- **Deferral policy:** You may defer a finding ONLY if the user chose "pick specific items" and did not include it, or if fixing it would require changes to files/systems outside this PR's scope (e.g., database migrations, third-party API changes). Suggestions and nitpicks are not automatically deferrable — they are real findings that the reviewers flagged for a reason. When the user said "address all", treat every category (must-fix, suggestions, nitpicks) with equal obligation.
 
 ### Step 5c: Verify
 Run full test suite once after all fixes.
 - Pass: proceed to Step 5d
 - Fail: identify breaking commit(s), revert, note as "skipped — broke tests"
 
-### Step 5d: Finalize
+### Step 5d: Resolution checklist
+
+Before pushing, produce a resolution checklist that accounts for EVERY finding in the compiled report. No finding may be omitted — if the compiled report has 14 items, the checklist has 14 rows. Use the same `#N` numbers from the compiled report.
+
+Each finding gets exactly one disposition:
+- **fixed** — code was changed to address this finding
+- **intentionally deferred** — not addressed in this PR, with a specific reason (ONLY allowed when user did NOT say "address all")
+- **not applicable** — the finding was incorrect, or the code it references doesn't exist / was already changed by another fix
+
+Present the checklist to the user in conversation BEFORE pushing. The user must see every item and its disposition. If they object to any disposition, revise before pushing.
+
+**Hard rule:** The number of rows in the checklist MUST equal the total findings count from the compiled report. If they don't match, you missed something — go back and account for every item.
+
+### Step 5e: Push and comment
+
 1. Push all commits
 2. Post follow-up PR comment:
    ```bash
    gh pr comment {NUMBER} --body "$(cat <<'EOF'
-   ## Review Fixes Applied
+   ## Review Fixes — Resolution Checklist
 
-   **Fixed:**
-   - `file:line` — what was changed and why
+   | # | Category | Finding | Disposition | Detail |
+   |---|----------|---------|-------------|--------|
+   | #1 | Must Fix | `file:line` — description | fixed | commit abc1234 |
+   | #2 | Suggestion | `file:line` — description | fixed | commit def5678 |
+   | #3 | Nitpick | `file:line` — description | not applicable | finding was incorrect because X |
 
-   **Skipped (with reason):**
-   - item — reason
+   **Summary:** X/Y fixed, Z not applicable, W intentionally deferred
 
    *All changes in latest push*
    EOF
