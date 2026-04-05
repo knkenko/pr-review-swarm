@@ -324,7 +324,7 @@ Present the checklist to the user in conversation BEFORE pushing. The user must 
 ### Step 5e: Push and comment
 
 1. Push all commits
-2. Post follow-up PR comment using bullet lists — do NOT use markdown tables (they render as broken CSV in many GitHub contexts). Use this exact format:
+2. Post follow-up PR comment. Use properly formatted markdown tables — header row, separator row (`|---|`), then data rows. Do NOT output raw pipe characters as plain text — the table must render as a formatted table in GitHub and in the terminal.
 
    ```bash
    gh pr comment {NUMBER} --body "$(cat <<'EOF'
@@ -332,14 +332,18 @@ Present the checklist to the user in conversation BEFORE pushing. The user must 
 
    ### Fixed (N items)
 
-   - **#1** · Must Fix · `file:line` — description → commit abc1234
-   - **#2** · Suggestion · `file:line` — description → commit def5678
-   - **#5** · Nitpick · `file:line` — description → commit ghi9012
+   | # | Category | Finding | Detail |
+   |---|----------|---------|--------|
+   | #1 | Must Fix | `file:line` — description | commit abc1234 |
+   | #2 | Suggestion | `file:line` — description | commit def5678 |
+   | #5 | Nitpick | `file:line` — description | commit ghi9012 |
 
    ### Unresolved (N items)
 
-   - **#3** · Nitpick · `file:line` — description → **not applicable:** finding was incorrect because X
-   - **#4** · Suggestion · `file:line` — description → **deferred:** requires database migration outside PR scope
+   | # | Category | Finding | Disposition |
+   |---|----------|---------|-------------|
+   | #3 | Nitpick | `file:line` — description | **not applicable:** finding was incorrect because X |
+   | #4 | Suggestion | `file:line` — description | **deferred:** requires database migration outside PR scope |
 
    **Total: T findings** — X fixed, Y not applicable, Z deferred
 
@@ -348,4 +352,4 @@ Present the checklist to the user in conversation BEFORE pushing. The user must 
    )"
    ```
 
-   The **Unresolved** section keeps the original `#N` index from the compiled report so the user can instantly cross-reference what was skipped and why. If everything was fixed, write "### Unresolved (0 items)" with "None" underneath — do not omit the section.
+   The **Unresolved** table keeps the original `#N` index from the compiled report so the user can instantly cross-reference what was skipped and why. If everything was fixed, write "### Unresolved (0 items)" with "None" underneath — do not omit the section.
