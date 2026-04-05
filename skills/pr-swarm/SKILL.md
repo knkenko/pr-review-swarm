@@ -186,11 +186,14 @@ Agents run in background. You are notified as each completes — do NOT poll or 
 - Do NOT skip ahead to Phase 4 while any agent is running
 - Do NOT start fixing code while agents are running
 
-**Timeout:** If one agent hasn't returned but all others completed 10+ minutes ago, mark as `failed` and proceed.
+**Timeout:** If one agent hasn't returned but all others completed 10+ minutes ago, mark as `timed_out` and proceed.
 
-**After all agents returned:**
+**Failed agent retry policy:** If any agent fails or times out, you MUST retry it once before moving on. Re-read the agent prompt file and re-launch. Only after a second failure may you mark it as `failed` and proceed without it. Do NOT silently skip failed agents — every selected agent was selected for a reason and its coverage area will have zero findings if skipped.
+
+**After all agents returned (including retries):**
 1. List all `*.md` files in `docs/reviews/PR-{NUMBER}/`. Report: "{X}/{N} produced findings."
-2. Update `_state.json`: set phase to `compiling`.
+2. If any agents failed after retry, warn the user: "Agents {list} failed after retry — their review areas have no coverage."
+3. Update `_state.json`: set phase to `compiling`.
 
 ## Phase 4: Compile Report
 
@@ -275,15 +278,19 @@ Agents run in background. You are notified as each completes — do NOT poll or 
 
 ## Phase 5: Fix Pass (Sequential)
 
-**STOP. Do NOT start fixing until ALL gates pass.** Fixing before the report is compiled means you'll miss findings, create partial fixes, and the PR comment won't reflect what was actually addressed. Fixing before user approval means you may change code the user wants left alone.
+**STOP. Read this entire gate checklist before touching any code file.**
 
-1. Every agent has returned (Phase 3 complete)
-2. Compiled report written (Phase 4 step 4)
+You are not allowed to edit, write, or modify any source file until every single gate below is TRUE. No exceptions. No "I'll present the report after." No "I'll fix this obvious one while waiting." The user has explicitly asked for this workflow — report first, then approval, then fixes. Violating this order means the user sees changes they never approved.
+
+**All five gates must be TRUE:**
+
+1. Every agent has returned or been retried and failed (Phase 3 complete)
+2. Compiled report written to disk (Phase 4 step 5)
 3. Findings posted as PR comment (Phase 4 step 7)
-4. Report presented to user (Phase 4 step 8)
-5. User has responded with their choice (Phase 4 step 9)
+4. Report presented to user in conversation (Phase 4 step 8)
+5. User has responded with their choice — you received an explicit message from the user (Phase 4 step 9)
 
-**If ANY gate is false, do NOT touch code files.**
+**If ANY gate is false, do NOT open, edit, or write any code file. Wait.**
 
 ### Step 5a: Plan fix order
 1. Priority order: must-fix → suggestions → nitpicks
@@ -303,7 +310,7 @@ Run full test suite once after all fixes.
 
 ### Step 5d: Resolution checklist
 
-Before pushing, produce a resolution checklist that accounts for EVERY finding in the compiled report. No finding may be omitted — if the compiled report has 14 items, the checklist has 14 rows. Use the same `#N` numbers from the compiled report.
+Before pushing, produce a resolution checklist that accounts for EVERY finding in the compiled report. No finding may be omitted — if the compiled report has 14 items, the checklist has 14 entries. Use the same `#N` numbers from the compiled report.
 
 Each finding gets exactly one disposition:
 - **fixed** — code was changed to address this finding
@@ -312,25 +319,33 @@ Each finding gets exactly one disposition:
 
 Present the checklist to the user in conversation BEFORE pushing. The user must see every item and its disposition. If they object to any disposition, revise before pushing.
 
-**Hard rule:** The number of rows in the checklist MUST equal the total findings count from the compiled report. If they don't match, you missed something — go back and account for every item.
+**Hard rule:** The total number of items across both sections (Fixed + Unresolved) MUST equal the total findings count from the compiled report. If they don't match, you missed something — go back and account for every item.
 
 ### Step 5e: Push and comment
 
 1. Push all commits
-2. Post follow-up PR comment:
+2. Post follow-up PR comment using bullet lists — do NOT use markdown tables (they render as broken CSV in many GitHub contexts). Use this exact format:
+
    ```bash
    gh pr comment {NUMBER} --body "$(cat <<'EOF'
    ## Review Fixes — Resolution Checklist
 
-   | # | Category | Finding | Disposition | Detail |
-   |---|----------|---------|-------------|--------|
-   | #1 | Must Fix | `file:line` — description | fixed | commit abc1234 |
-   | #2 | Suggestion | `file:line` — description | fixed | commit def5678 |
-   | #3 | Nitpick | `file:line` — description | not applicable | finding was incorrect because X |
+   ### Fixed (N items)
 
-   **Summary:** X/Y fixed, Z not applicable, W intentionally deferred
+   - **#1** · Must Fix · `file:line` — description → commit abc1234
+   - **#2** · Suggestion · `file:line` — description → commit def5678
+   - **#5** · Nitpick · `file:line` — description → commit ghi9012
+
+   ### Unresolved (N items)
+
+   - **#3** · Nitpick · `file:line` — description → **not applicable:** finding was incorrect because X
+   - **#4** · Suggestion · `file:line` — description → **deferred:** requires database migration outside PR scope
+
+   **Total: T findings** — X fixed, Y not applicable, Z deferred
 
    *All changes in latest push*
    EOF
    )"
    ```
+
+   The **Unresolved** section keeps the original `#N` index from the compiled report so the user can instantly cross-reference what was skipped and why. If everything was fixed, write "### Unresolved (0 items)" with "None" underneath — do not omit the section.
