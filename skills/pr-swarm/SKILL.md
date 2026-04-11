@@ -267,7 +267,43 @@ Agents run in background. You are notified as each completes — do NOT poll or 
    )"
    ```
 
-8. **Present the report** to the user in conversation.
+8. **Present the report** to the user in conversation using the **exact format below**. This is a hard requirement — do NOT summarize, abbreviate, omit categories, show only counters, or skip lower-severity findings. Every single finding from the compiled report must appear in the table, regardless of severity. The user needs the full picture to make an informed decision.
+
+   **Required in-conversation format:**
+
+   ```
+   ## PR Review — PR #{NUMBER}: {TITLE}
+
+   **Summary:** N files reviewed, M agents ran, T total findings
+
+   ### Must Fix (X items)
+
+   | # | Location | Agents | Finding |
+   |---|----------|--------|---------|
+   | #1 | `file:line` | agent1, agent2 | Description of the finding |
+   | #2 | `file:line` | agent1 | Description of the finding |
+
+   ### Suggestions (Y items)
+
+   | # | Location | Agents | Finding |
+   |---|----------|--------|---------|
+   | #3 | `file:line` | agent1 | Description of the finding |
+
+   ### Nitpicks (Z items)
+
+   | # | Location | Agents | Finding |
+   |---|----------|--------|---------|
+   | #4 | `file:line` | agent1 | Description of the finding |
+
+   **Total findings: T** (Must Fix: X, Suggestions: Y, Nitpicks: Z)
+   ```
+
+   **Violations — do NOT do any of the following:**
+   - Do NOT show only Must Fix items and mention "there are also N suggestions and M nitpicks" — list them all in the tables
+   - Do NOT replace the tables with a bullet list, prose paragraph, or summary
+   - Do NOT show only finding counts or the report file path — the user must see every finding inline
+   - Do NOT truncate or collapse any category — every finding from the compiled report must appear
+   - If a category has 0 items, show the heading with "(0 items)" and write "None" instead of a table
 
 9. **Ask:** "Want me to address all findings, pick specific items, or skip?"
 
